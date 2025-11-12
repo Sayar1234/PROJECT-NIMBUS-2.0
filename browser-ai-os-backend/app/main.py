@@ -1,15 +1,18 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
+from app.api import metrics
+
+
 import os
 
 from app.api import files, notes, chat, terminal, settings
 from app.database import engine, Base
 
-# Create tables
+# Tables
 Base.metadata.create_all(bind=engine)
 
-# Create storage directory
+# Storage
 os.makedirs("storage/files", exist_ok=True)
 
 app = FastAPI(
@@ -18,19 +21,20 @@ app = FastAPI(
     version="1.0.0"
 )
 
-# CORS middleware
+# CORS
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],  # In production, replace with specific origins
+    allow_origins=["*"],  # restrict in prod
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )
+app.include_router(metrics.router, prefix="/api/metrics", tags=["Metrics"])
 
-# Mount static files
+# Static files
 app.mount("/storage", StaticFiles(directory="storage"), name="storage")
 
-# Include routers
+# Routers
 app.include_router(files.router, prefix="/api/files", tags=["Files"])
 app.include_router(notes.router, prefix="/api/notes", tags=["Notes"])
 app.include_router(chat.router, prefix="/api/chat", tags=["Chat"])

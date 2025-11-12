@@ -5,22 +5,17 @@ import os
 
 from app.config import settings
 
-# Create data directory
-os.makedirs("data", exist_ok=True)
+os.makedirs("data", exist_ok=True)  # data dir
 
-# Create engine
 engine = create_engine(
     settings.database_url,
-    connect_args={"check_same_thread": False}  # Only for SQLite
+    connect_args={"check_same_thread": False}  # sqlite
 )
 
-# Create session
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 
-# Base class for models
 Base = declarative_base()
 
-# Dependency for database session
 def get_db():
     db = SessionLocal()
     try:

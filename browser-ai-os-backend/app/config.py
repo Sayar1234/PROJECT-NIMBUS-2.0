@@ -2,20 +2,20 @@ from pydantic_settings import BaseSettings
 from functools import lru_cache
 
 class Settings(BaseSettings):
-    # App settings
+    # App
     app_name: str = "Browser AI OS"
     debug: bool = True
     
-    # Database
+    # DB
     database_url: str = "sqlite:///./data/app.db"
-    
-    # File storage
+
+    # Storage
     storage_path: str = "./storage/files"
     max_file_size: int = 10 * 1024 * 1024  # 10MB
-    
-    # Groq API (FREE)
-    groq_api_key: str = ""  # Set via environment variable
-    groq_model: str = "llama-3.1-70b-versatile"  # Free model
+
+    # Groq
+    groq_api_key: str = ""  # from .env
+    groq_model: str = "llama-3.3-70b-versatile"
     max_tokens: int = 4096
     
     # Terminal

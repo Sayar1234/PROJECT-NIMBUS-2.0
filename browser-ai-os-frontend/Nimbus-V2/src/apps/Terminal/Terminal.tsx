@@ -71,7 +71,7 @@ export default function Terminal() {
         break;
 
       default:
-        // Send unknown/natural language commands to backend AI terminal
+        // send to backend
         try {
           const res = await fetch(
             `${import.meta.env.VITE_API_URL || 'http://localhost:8000'}/api/terminal/execute`,

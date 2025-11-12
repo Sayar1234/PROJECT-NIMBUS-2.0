@@ -25,18 +25,18 @@ async def list_files(path: str = "/", db: Session = Depends(get_db)):
 @router.post("/", response_model=FileResponse)
 async def create_file_or_folder(file_data: FileCreate, db: Session = Depends(get_db)):
     """Create a new file or folder"""
-    # Generate path
+    # path
     if file_data.parent_path:
         file_path = f"{file_data.parent_path}/{file_data.name}"
     else:
         file_path = f"/{file_data.name}"
     
-    # Check if already exists
+    # exists
     existing = db.query(File).filter(File.path == file_path).first()
     if existing:
         raise HTTPException(status_code=400, detail="File or folder already exists")
     
-    # Create database entry
+    # db entry
     db_file = File(
         name=file_data.name,
         path=file_path,
@@ -46,7 +46,7 @@ async def create_file_or_folder(file_data: FileCreate, db: Session = Depends(get
         size=0
     )
     
-    # Create physical file/folder
+    # fs
     full_path = os.path.join(settings.storage_path, file_path.lstrip("/"))
     
     if file_data.type == "folder":
@@ -71,25 +71,25 @@ async def upload_file(
     db: Session = Depends(get_db)
 ):
     """Upload a file"""
-    # Generate path
+    # path
     if parent_path and parent_path != "/":
         file_path = f"{parent_path}/{file.filename}"
     else:
         file_path = f"/{file.filename}"
     
-    # Check if already exists
+    # exists
     existing = db.query(File).filter(File.path == file_path).first()
     if existing:
         raise HTTPException(status_code=400, detail="File already exists")
     
-    # Save file
+    # save
     full_path = os.path.join(settings.storage_path, file_path.lstrip("/"))
     os.makedirs(os.path.dirname(full_path), exist_ok=True)
     
     with open(full_path, "wb") as buffer:
         shutil.copyfileobj(file.file, buffer)
     
-    # Create database entry
+    # db entry
     db_file = File(
         name=file.filename,
         path=file_path,
@@ -143,7 +143,7 @@ async def update_file(file_id: int, file_data: FileUpdate, db: Session = Depends
     
     full_path = os.path.join(settings.storage_path, db_file.path.lstrip("/"))
     
-    # Update name
+    # rename
     if file_data.name:
         old_path = full_path
         new_path = os.path.join(os.path.dirname(full_path), file_data.name)
@@ -151,7 +151,7 @@ async def update_file(file_id: int, file_data: FileUpdate, db: Session = Depends
         db_file.name = file_data.name
         db_file.path = db_file.path.replace(db_file.name, file_data.name)
     
-    # Update content
+    # update content
     if file_data.content is not None and not db_file.is_folder:
         with open(full_path, "w") as f:
             f.write(file_data.content)
@@ -172,14 +172,14 @@ async def delete_file(file_id: int, db: Session = Depends(get_db)):
     
     full_path = os.path.join(settings.storage_path, db_file.path.lstrip("/"))
     
-    # Delete physical file/folder
+    # delete fs
     if os.path.exists(full_path):
         if db_file.is_folder:
             shutil.rmtree(full_path)
         else:
             os.remove(full_path)
     
-    # Delete database entry
+    # delete db
     db.delete(db_file)
     db.commit()
     
